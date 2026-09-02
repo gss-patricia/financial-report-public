@@ -18,4 +18,5 @@ def search(request: SearchRequest):
         request.query,
         request.limit,
         request.filter,
+        request.min_score,
     )

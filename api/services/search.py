@@ -24,7 +24,11 @@ class SearchService:
         return {"must": must_conditions}
 
     def search(
-        self, query: str, limit: int = 3, filter: Optional[Dict[str, Any]] = None
+        self,
+        query: str,
+        limit: int = 3,
+        filter: Optional[Dict[str, Any]] = None,
+        min_score: Optional[float] = None,
     ):
         query_dense, query_sparse, query_colbert = self.embedding_service.embed_query(
             query
@@ -50,15 +54,26 @@ class SearchService:
             query_filter=query_filter,
         )
 
-        max_score = max(result.score for result in results.points)
+        points = results.points
+
+        if min_score is not None:
+            points = [point for point in points if point.score >= min_score]
+
+        # Nada passou o filtro ou a query nao devolveu nada: lista vazia em vez
+        # de rebentar no max(). Quem chama decide o que fazer com o silencio.
+        if not points:
+            return SearchResponse(results=[])
+
+        max_score = max(point.score for point in points)
 
         search_results = [
             SearchResult(
-                score=result.score / max_score,
-                text=result.payload["text"],
-                metadata=result.payload["metadata"],
+                score=point.score / max_score,
+                raw_score=point.score,
+                text=point.payload["text"],
+                metadata=point.payload["metadata"],
             )
-            for result in results.points
+            for point in points
         ]
 
         return SearchResponse(results=search_results)
