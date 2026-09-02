@@ -1,3 +1,4 @@
+import os
 from typing import Literal
 
 from dotenv import load_dotenv
@@ -6,6 +7,8 @@ from openai import OpenAI
 from pydantic import BaseModel, Field
 
 load_dotenv()
+
+MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
 
 langfuse = Langfuse()
 
@@ -59,7 +62,7 @@ def evaluate_fundamental_analysis(trace_data: dict) -> FundamentalAnalysisEvalua
     )
 
     response = client.responses.parse(
-        model="meta-llama/llama-4-scout-17b-16e-instruct",
+        model=MODEL,
         text_format=FundamentalAnalysisEvaluation,
         input=[{"role": "user", "content": prompt}],
         temperature=0,
@@ -94,7 +97,7 @@ def evaluate_recommendation_quality(trace_data: dict) -> FundamentalAnalysisEval
     """
 
     response = client.responses.parse(
-        model="meta-llama/llama-4-scout-17b-16e-instruct",
+        model=MODEL,
         text_format=FundamentalAnalysisEvaluation,
         input=[{"role": "user", "content": prompt}],
         temperature=0,

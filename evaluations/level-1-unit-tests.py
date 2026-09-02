@@ -1,10 +1,13 @@
 import json
+import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel, Field
 
 load_dotenv()
+
+MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
 
 client = OpenAI(base_url="https://api.groq.com/openai/v1")
 
@@ -56,7 +59,7 @@ def extract_ticker(query: str) -> str | None:
     prompt = TICKER_EXTRACTION_PROMPT.format(query=query)
 
     response = client.responses.parse(
-        model="meta-llama/llama-4-scout-17b-16e-instruct",
+        model=MODEL,
         text_format=TickerResult,
         input=[{"role": "user", "content": prompt}],
         temperature=0,
