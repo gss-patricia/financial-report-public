@@ -66,11 +66,23 @@ class AgentService:
         prompt = SENTIMENT_PROMPT.format(context=context)
         return await self._generate_completion(prompt, SentimentAnalysis)
 
+    def _has_indexed_data(self, ticker: str) -> bool:
+        results = self.search_service.search(ticker, 1, {"ticker": ticker})
+        return bool(results.results)
+
     async def analyze(self, query: str, limit: int = 3):
         ticker = self.ticker_extractor.extract_ticker(query)
 
         if not ticker:
             raise ValueError("Could not extract a valid ticker symbol from the query")
+
+        # Sem dados indexados para este ticker as tres streams recebem contexto
+        # vazio e o LLM inventa uma analise. Melhor dizer que nao sabemos.
+        if not self._has_indexed_data(ticker):
+            raise ValueError(
+                f"No indexed data for {ticker}. Run the ingestion scripts for "
+                f"this ticker before requesting an analysis."
+            )
 
         fundamental_task = self._analyze_fundamental(ticker, limit)
         momentum_task = self._analyze_momentum(ticker, limit)
