@@ -10,8 +10,22 @@ class RAGService:
         self.search_service = search_service
         self.client = Groq(api_key=settings.groq_api_key)
 
-    def generate_answer(self, query: str, limit: int = 3):
-        search_results = self.search_service.search(query, limit)
+    NO_CONTEXT_ANSWER = (
+        "I don't have enough information in the indexed documents to answer "
+        "this question."
+    )
+
+    def generate_answer(self, query: str, limit: int = 3, min_score=None):
+        search_results = self.search_service.search(
+            query, limit, min_score=min_score
+        )
+
+        # Sem contexto nao ha resposta possivel: dizer isso custa uma chamada
+        # a menos ao LLM e evita uma resposta confiante sobre nada.
+        if not search_results.results:
+            return RAGResponse(
+                query=query, answer=self.NO_CONTEXT_ANSWER, metadata=[]
+            )
 
         context = "\n\n".join(result.text for result in search_results.results)
 
