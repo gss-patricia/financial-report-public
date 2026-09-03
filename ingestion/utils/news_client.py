@@ -18,15 +18,26 @@ class NewsClient:
             if content_type != "STORY":
                 continue
 
-            canonical_url = content.get("canonicalUrl", {})
+            canonical_url = content.get("canonicalUrl") or {}
             title = content.get("title")
             date = content.get("pubDate")
             url = canonical_url.get("url")
 
-            if "finance.yahoo.com" not in url:
+            if not url or "finance.yahoo.com" not in url:
                 continue
 
-            downloaded = trafilatura.fetch_url(url)
+            # One article failing to download must not take the rest of the
+            # ingestion down: networks drop, Yahoo blocks, pages disappear.
+            try:
+                downloaded = trafilatura.fetch_url(url)
+            except Exception as exc:
+                print(f"failed to download {url}: {exc}")
+                continue
+
+            if not downloaded:
+                print(f"no content at {url}")
+                continue
+
             text_content = trafilatura.extract(downloaded)
 
             if text_content:

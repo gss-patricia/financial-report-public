@@ -20,8 +20,8 @@ class RAGService:
             query, limit, min_score=min_score
         )
 
-        # Sem contexto nao ha resposta possivel: dizer isso custa uma chamada
-        # a menos ao LLM e evita uma resposta confiante sobre nada.
+        # No context means no answer is possible: saying so costs one fewer
+        # LLM call and avoids a confident answer about nothing.
         if not search_results.results:
             return RAGResponse(
                 query=query, answer=self.NO_CONTEXT_ANSWER, metadata=[]

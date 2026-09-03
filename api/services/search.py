@@ -59,8 +59,9 @@ class SearchService:
         if min_score is not None:
             points = [point for point in points if point.score >= min_score]
 
-        # Nada passou o filtro ou a query nao devolveu nada: lista vazia em vez
-        # de rebentar no max(). Quem chama decide o que fazer com o silencio.
+        # Nothing passed the filter or the query returned nothing: an empty
+        # list instead of blowing up in max(). The caller decides what the
+        # silence means.
         if not points:
             return SearchResponse(results=[])
 

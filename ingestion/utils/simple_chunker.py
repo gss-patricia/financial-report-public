@@ -1,3 +1,5 @@
+from typing import List
+
 from transformers import AutoTokenizer
 
 
@@ -10,8 +12,24 @@ class SimpleChunker:
         self.max_tokens = max_tokens
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
+    def _split_long_paragraph(self, paragraph: str) -> List[str]:
+        """A paragraph longer than max_tokens would be silently truncated by
+        the embedding model, so split it on the token budget."""
+        token_ids = self.tokenizer.encode(paragraph, add_special_tokens=False)
+
+        if len(token_ids) <= self.max_tokens:
+            return [paragraph]
+
+        return [
+            self.tokenizer.decode(token_ids[i : i + self.max_tokens])
+            for i in range(0, len(token_ids), self.max_tokens)
+        ]
+
     def create_chunks(self, text_content: str):
         paragraphs = [p.strip() for p in text_content.split("\n") if p.strip()]
+        paragraphs = [
+            piece for p in paragraphs for piece in self._split_long_paragraph(p)
+        ]
 
         chunks = []
         current_chunk = []

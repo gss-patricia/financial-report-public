@@ -76,8 +76,8 @@ class AgentService:
         if not ticker:
             raise ValueError("Could not extract a valid ticker symbol from the query")
 
-        # Sem dados indexados para este ticker as tres streams recebem contexto
-        # vazio e o LLM inventa uma analise. Melhor dizer que nao sabemos.
+        # With no indexed data for this ticker all three streams get empty
+        # context and the LLM invents an analysis. Better to say we don't know.
         if not self._has_indexed_data(ticker):
             raise ValueError(
                 f"No indexed data for {ticker}. Run the ingestion scripts for "

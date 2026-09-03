@@ -22,4 +22,4 @@ for field_name in fields_to_index:
         field_name=field_name,
         field_schema=models.PayloadSchemaType.KEYWORD,
     )
-    print(f"índice criado para {field_name}")
+    print(f"index created for {field_name}")

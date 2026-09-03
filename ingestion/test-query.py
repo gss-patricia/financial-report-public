@@ -42,6 +42,10 @@ results = qdrant.query_points(
     limit=3,
 )
 
+if not results.points:
+    print("No results for this query.")
+    raise SystemExit(0)
+
 max_score = max(result.score for result in results.points)
 
 for r in results.points:

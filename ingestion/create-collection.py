@@ -12,7 +12,7 @@ qdrant = QdrantClient(
     api_key=os.getenv("QDRANT_API_KEY"),
 )
 
-# Deleta a collection
+# Drop the collection
 # qdrant.delete_collection(COLLECTION_NAME)
 
 qdrant.create_collection(
